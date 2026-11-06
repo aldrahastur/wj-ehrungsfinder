@@ -1,36 +1,26 @@
 <?php
 
-namespace Tests\Unit\Ehrungen;
-
 use App\Domain\Ehrungen\Truth;
-use PHPUnit\Framework\TestCase;
 
-class TruthTest extends TestCase
-{
-    public function test_and_is_excluded_by_one_definitely_false_criterion(): void
-    {
-        $this->assertSame(Truth::False, Truth::all([Truth::True, Truth::Unknown, Truth::Blocked, Truth::False]));
-    }
+test('and is excluded by one definitely false criterion', function () {
+    expect(Truth::all([Truth::True, Truth::Unknown, Truth::Blocked, Truth::False]))->toBe(Truth::False);
+});
 
-    public function test_and_with_unknown_keeps_recommendation_open(): void
-    {
-        $this->assertSame(Truth::Unknown, Truth::all([Truth::True, Truth::Unknown]));
-        $this->assertSame(Truth::Blocked, Truth::all([Truth::True, Truth::Unknown, Truth::Blocked]));
-        $this->assertSame(Truth::True, Truth::all([Truth::True, Truth::True]));
-    }
+test('and with unknown keeps recommendation open', function () {
+    expect(Truth::all([Truth::True, Truth::Unknown]))->toBe(Truth::Unknown)
+        ->and(Truth::all([Truth::True, Truth::Unknown, Truth::Blocked]))->toBe(Truth::Blocked)
+        ->and(Truth::all([Truth::True, Truth::True]))->toBe(Truth::True);
+});
 
-    public function test_or_is_satisfied_by_one_definitely_met_path(): void
-    {
-        $this->assertSame(Truth::True, Truth::any([Truth::False, Truth::Blocked, Truth::True]));
-        $this->assertSame(Truth::Blocked, Truth::any([Truth::False, Truth::Blocked]));
-        $this->assertSame(Truth::Unknown, Truth::any([Truth::False, Truth::Unknown]));
-        $this->assertSame(Truth::False, Truth::any([Truth::False, Truth::False]));
-    }
+test('or is satisfied by one definitely met path', function () {
+    expect(Truth::any([Truth::False, Truth::Blocked, Truth::True]))->toBe(Truth::True)
+        ->and(Truth::any([Truth::False, Truth::Blocked]))->toBe(Truth::Blocked)
+        ->and(Truth::any([Truth::False, Truth::Unknown]))->toBe(Truth::Unknown)
+        ->and(Truth::any([Truth::False, Truth::False]))->toBe(Truth::False);
+});
 
-    public function test_not_keeps_unknown_and_blocked(): void
-    {
-        $this->assertSame(Truth::False, Truth::True->negate());
-        $this->assertSame(Truth::Unknown, Truth::Unknown->negate());
-        $this->assertSame(Truth::Blocked, Truth::Blocked->negate());
-    }
-}
+test('not keeps unknown and blocked', function () {
+    expect(Truth::True->negate())->toBe(Truth::False)
+        ->and(Truth::Unknown->negate())->toBe(Truth::Unknown)
+        ->and(Truth::Blocked->negate())->toBe(Truth::Blocked);
+});
