@@ -1,0 +1,25 @@
+# Eigenständige Pipeline. Bei Bedarf durch ein include aus dem zentralen Template-Repository ersetzen.
+stages:
+  - test
+
+tests:
+  stage: test
+  image: php:8.3-cli
+  variables:
+    COMPOSER_ALLOW_SUPERUSER: "1"
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq git unzip libsqlite3-dev libzip-dev libicu-dev nodejs npm > /dev/null
+    - docker-php-ext-install -j"$(nproc)" pdo_sqlite zip intl > /dev/null
+    - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+  script:
+    - composer install --no-interaction --prefer-dist
+    - cp .env.example .env
+    - php artisan key:generate
+    - npm ci || npm install
+    - npm run build
+    - php artisan test
+  cache:
+    key: "$CI_COMMIT_REF_SLUG"
+    paths:
+      - vendor/
+      - node_modules/
