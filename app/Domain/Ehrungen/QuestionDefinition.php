@@ -5,8 +5,9 @@ namespace App\Domain\Ehrungen;
 final readonly class QuestionDefinition
 {
     /**
+     * Ableitungen in $impliedBy, z. B. „unter 2 Jahren“ ⇒ „nicht 5 Jahre“.
+     *
      * @param  list<array{question: string, answer: string, implies: string}>  $impliedBy
-     *                                                                            Ableitungen, z. B. „unter 2 Jahren“ ⇒ „nicht 5 Jahre“
      */
     public function __construct(
         public string $code,

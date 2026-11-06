@@ -16,6 +16,7 @@ class ReferenceCaseRunner
 
     /**
      * @param  array<int, RuleVersion>  $overrides
+     * @param  Collection<int, ReferenceCase>|null  $cases
      * @return Collection<int, array{case: ReferenceCase, passed: bool, mismatches: array<string, array{expected: ?string, actual: ?string}>}>
      */
     public function run(array $overrides = [], ?Collection $cases = null): Collection

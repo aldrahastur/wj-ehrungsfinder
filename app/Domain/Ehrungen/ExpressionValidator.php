@@ -9,7 +9,6 @@ namespace App\Domain\Ehrungen;
 final class ExpressionValidator
 {
     /**
-     * @param  mixed  $node
      * @param  list<string>  $knownQuestions
      * @return list<string> Fehlermeldungen (leer = gültig)
      */

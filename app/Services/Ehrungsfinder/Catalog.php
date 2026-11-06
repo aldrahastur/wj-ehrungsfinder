@@ -17,7 +17,7 @@ class Catalog
     /** @var Collection<int, Honor>|null */
     private ?Collection $honors = null;
 
-    /** @var Collection<int, Question>|null */
+    /** @var Collection<string, Question>|null */
     private ?Collection $questions = null;
 
     /**
@@ -41,7 +41,7 @@ class Catalog
     }
 
     /**
-     * @return Collection<int, Question>
+     * @return Collection<string, Question>
      */
     public function questions(): Collection
     {
@@ -59,10 +59,9 @@ class Catalog
      */
     public function rules(array $overrides = []): array
     {
-        return $this->honors()
+        return array_values($this->honors()
             ->map(fn (Honor $h) => $h->toRule($overrides[$h->id] ?? null))
-            ->values()
-            ->all();
+            ->all());
     }
 
     /**
@@ -70,7 +69,7 @@ class Catalog
      */
     public function questionDefinitions(): array
     {
-        return $this->questions()->map(fn (Question $q) => $q->toDefinition())->values()->all();
+        return array_values($this->questions()->map(fn (Question $q) => $q->toDefinition())->all());
     }
 
     public function flush(): void

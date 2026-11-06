@@ -26,7 +26,7 @@ final class Evaluator
     {
         if (array_key_exists('all', $node) || array_key_exists('any', $node)) {
             $kind = array_key_exists('all', $node) ? 'all' : 'any';
-            $children = array_map(fn (array $c) => $this->evaluate($c, $answers, $group), $node[$kind]);
+            $children = array_map(fn (array $c) => $this->evaluate($c, $answers, $group), array_values($node[$kind]));
             $values = array_map(fn (EvaluatedNode $c) => $c->value, $children);
 
             return new EvaluatedNode(

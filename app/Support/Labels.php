@@ -64,8 +64,11 @@ final class Labels
 
     public static function reason(?string $reason, mixed $detail = null): ?string
     {
+        if ($reason === null) {
+            return null;
+        }
+
         return match ($reason) {
-            null => null,
             Assessor::REASON_NO_PUBLISHED_RULE => __('Für diese Ehrung ist noch keine Regelversion freigegeben.'),
             Assessor::REASON_PENDING_CONFIRMATION => __('Die recherchierte Regel ist noch nicht vom Verband bestätigt.'),
             Assessor::REASON_CONFLICTING => __('Die Quellen widersprechen sich. Die geltende Regel muss schriftlich bestätigt werden.'),
@@ -185,6 +188,6 @@ final class Labels
      */
     private static function enum(string $class, \BackedEnum|string $value): \BackedEnum
     {
-        return $value instanceof \BackedEnum ? $value : $class::from($value);
+        return $class::from($value instanceof \BackedEnum ? $value->value : $value);
     }
 }

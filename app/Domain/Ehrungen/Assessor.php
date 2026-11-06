@@ -82,14 +82,21 @@ final class Assessor
             return null;
         }
 
-        return match ($node->kind) {
-            'blocked' => [self::REASON_BLOCKED_PATH, $node->data['reason'] ?? null],
-            'recipient' => [self::REASON_RECIPIENT_UNCLEAR, $node->data['group']],
-            'prior' => [self::REASON_PRIOR_UNCLEAR, $node->data['question']],
-            default => array_reduce(
-                $node->children,
-                fn (?array $found, EvaluatedNode $child) => $found ?? $this->blockReason($child),
-            ),
-        };
+        switch ($node->kind) {
+            case 'blocked':
+                return [self::REASON_BLOCKED_PATH, $node->data['reason'] ?? null];
+            case 'recipient':
+                return [self::REASON_RECIPIENT_UNCLEAR, $node->data['group']];
+            case 'prior':
+                return [self::REASON_PRIOR_UNCLEAR, $node->data['question']];
+        }
+
+        foreach ($node->children as $child) {
+            if (($found = $this->blockReason($child)) !== null) {
+                return $found;
+            }
+        }
+
+        return null;
     }
 }

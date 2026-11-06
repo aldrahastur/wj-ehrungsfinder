@@ -47,7 +47,6 @@ class Finder
     }
 
     /**
-     * @param  array<string, string>  $answers
      * @return list<string>
      */
     public function honorsUsing(string $questionCode, ?string $region, RecipientGroup $group): array

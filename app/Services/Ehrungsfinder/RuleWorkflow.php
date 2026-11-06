@@ -8,6 +8,7 @@ use App\Domain\Ehrungen\RuleBasis;
 use App\Models\Honor;
 use App\Models\Question;
 use App\Models\RuleVersion;
+use App\Models\Source;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -33,7 +34,7 @@ class RuleWorkflow
             $draft = $honor->ruleVersions()->create([
                 'version' => $honor->nextVersionNumber(),
                 'status' => RuleVersion::STATUS_DRAFT,
-                'basis' => $from?->basis ?? RuleBasis::PendingConfirmation,
+                'basis' => $from->basis ?? RuleBasis::PendingConfirmation,
                 'basis_note' => $from?->basis_note,
                 'criteria' => $from?->criteria,
                 'valid_from' => $from?->valid_from,
@@ -42,7 +43,7 @@ class RuleWorkflow
             ]);
 
             if ($from) {
-                $draft->sources()->sync($from->sources->mapWithKeys(fn ($s) => [$s->id => ['locator' => $s->pivot->locator]])->all());
+                $draft->sources()->sync($from->sources->mapWithKeys(fn (Source $s) => [$s->id => ['locator' => $s->pivot->locator]])->all());
             }
 
             $this->log($draft, $user, 'created', $from ? "Kopie von {$from->label()}" : null);
@@ -52,6 +53,7 @@ class RuleWorkflow
     }
 
     /**
+     * @param  array<string, mixed>|null  $criteria
      * @return list<string>
      */
     public function validationErrors(?array $criteria, RuleBasis $basis): array
@@ -64,7 +66,9 @@ class RuleWorkflow
             return ['Kriterien fehlen.'];
         }
 
-        return $this->validator->validate($criteria, Question::query()->pluck('code')->all());
+        $known = array_values(Question::query()->get(['code'])->map(fn (Question $q): string => $q->code)->all());
+
+        return $this->validator->validate($criteria, $known);
     }
 
     public function submit(RuleVersion $version, User $user, ?string $note = null): void

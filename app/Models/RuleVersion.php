@@ -4,11 +4,37 @@ namespace App\Models;
 
 use App\Domain\Ehrungen\RuleBasis;
 use App\Models\Concerns\HasTranslations;
+use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $id
+ * @property int $honor_id
+ * @property int $version
+ * @property string $status
+ * @property RuleBasis $basis
+ * @property array<string, string>|null $basis_note
+ * @property array<string, mixed>|null $criteria
+ * @property CarbonImmutable|null $valid_from
+ * @property CarbonImmutable|null $valid_until
+ * @property string|null $change_note
+ * @property int|null $created_by
+ * @property int|null $submitted_by
+ * @property CarbonImmutable|null $submitted_at
+ * @property int|null $approved_by
+ * @property CarbonImmutable|null $approved_at
+ * @property string|null $approval_role
+ * @property CarbonImmutable|null $published_at
+ * @property CarbonImmutable|null $created_at
+ * @property CarbonImmutable|null $updated_at
+ * @property-read Honor $honor
+ * @property-read RuleVersionSource $pivot  nur beim Laden über Source::ruleVersions()
+ * @property-read Collection<int, Source> $sources
+ */
 class RuleVersion extends Model
 {
     use HasTranslations;
@@ -40,31 +66,49 @@ class RuleVersion extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Honor, $this>
+     */
     public function honor(): BelongsTo
     {
         return $this->belongsTo(Honor::class);
     }
 
+    /**
+     * @return BelongsToMany<Source, $this, RuleVersionSource, 'pivot'>
+     */
     public function sources(): BelongsToMany
     {
-        return $this->belongsToMany(Source::class)->withPivot('locator')->orderBy('code');
+        return $this->belongsToMany(Source::class)->using(RuleVersionSource::class)->withPivot('locator')->orderBy('code');
     }
 
+    /**
+     * @return HasMany<RuleVersionEvent, $this>
+     */
     public function events(): HasMany
     {
         return $this->hasMany(RuleVersionEvent::class)->latest('id');
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function submitter(): BelongsTo
     {
         return $this->belongsTo(User::class, 'submitted_by');
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function approver(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approved_by');

@@ -4,9 +4,24 @@ namespace App\Models;
 
 use App\Domain\Ehrungen\QuestionDefinition;
 use App\Models\Concerns\HasTranslations;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property int $id
+ * @property string $code
+ * @property string $answer_type
+ * @property array<string, string> $text
+ * @property array<string, string> $criterion
+ * @property array<string, string>|null $explanation
+ * @property string|null $region
+ * @property list<array{question: string, answer: string, implies: string}>|null $implied_by
+ * @property int $sort
+ * @property bool $active
+ * @property CarbonImmutable|null $created_at
+ * @property CarbonImmutable|null $updated_at
+ */
 class Question extends Model
 {
     use HasTranslations;
@@ -24,11 +39,17 @@ class Question extends Model
         ];
     }
 
+    /**
+     * @param  Builder<self>  $query
+     */
     public function scopeActive(Builder $query): void
     {
         $query->where('active', true);
     }
 
+    /**
+     * @param  Builder<self>  $query
+     */
     public function scopeOrdered(Builder $query): void
     {
         $query->orderBy('sort')->orderBy('id');
